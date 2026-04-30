@@ -1,0 +1,42 @@
+name: PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm lint
+
+      - name: Test with coverage
+        run: pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify dist output
+        run: |
+          test -f dist/index.js || (echo "Missing ESM output" && exit 1)
+          test -f dist/index.cjs || (echo "Missing CJS output" && exit 1)
+          test -f dist/index.d.ts || (echo "Missing type declarations" && exit 1)
+
+      - name: Check package contents
+        run: pnpm pack --dry-run

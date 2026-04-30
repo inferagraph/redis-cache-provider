@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm lint
+
+      - name: Test with coverage
+        run: pnpm test:coverage
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify dist output
+        run: |
+          test -f dist/index.js || (echo "Missing ESM output" && exit 1)
+          test -f dist/index.cjs || (echo "Missing CJS output" && exit 1)
+          test -f dist/index.d.ts || (echo "Missing type declarations" && exit 1)
+
+      - name: Check version change
+        id: version
+        run: |
+          PUBLISHED=$(npm view $(node -p "require('./package.json').name") version 2>/dev/null || echo "0.0.0")
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "published=$PUBLISHED" >> "$GITHUB_OUTPUT"
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+
+      - name: Pin npm to Trusted-Publishing-compatible version
+        if: steps.version.outputs.published != steps.version.outputs.current
+        run: npm install -g npm@11.5.1
+
+      - name: Publish to npm
+        if: steps.version.outputs.published != steps.version.outputs.current
+        run: npm publish --provenance --access public

@@ -1,0 +1,60 @@
+{
+  "name": "@inferagraph/redis-cache-provider",
+  "version": "0.1.0",
+  "description": "Redis-backed cache provider for @inferagraph/core. Honors maxEntries + TTL semantics. Suitable for production deployments where in-memory caching is insufficient.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/inferagraph/redis-cache-provider.git"
+  },
+  "homepage": "https://github.com/inferagraph/redis-cache-provider#readme",
+  "keywords": [
+    "inferagraph",
+    "cache",
+    "redis",
+    "llm",
+    "ai"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "license": "MIT",
+  "peerDependencies": {
+    "@inferagraph/core": "^0.2.0"
+  },
+  "dependencies": {
+    "redis": "^4.6.0"
+  },
+  "devDependencies": {
+    "@inferagraph/core": "link:../inferagraph",
+    "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^3.1.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.1.1"
+  }
+}
